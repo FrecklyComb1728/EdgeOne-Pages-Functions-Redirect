@@ -62,20 +62,3 @@ curl -v -H "Host: 127.0.0.1:8088" http://localhost:8088/
 ## 部署
 
 将 `edge-functions/` 目录部署到支持 EdgeOne / Pages 的平台。确保入口为命名导出 `onRequest`（而不是 default 对象），否则运行时会出现 `ReferenceError: onRequest is not defined`。
-
-## 建议的改进（可选）
-
-- 添加规则校验脚本，启动时验证 `redirect-rules.json` 的正确性（缺失字段、错误 URL、冲突规则等）。
-- 将规则转换成更高效的数据结构（如 Map）用于生产环境以加速查找。
-- 为常用场景添加测试（例如：精确匹配、通配符匹配、带端口的 host、缺失 Host header）。
-- 在 CI 中加入 lint/格式和简单的集成测试，保证入口函数签名正确。
-
-## 变更记录（本仓库当前修改）
-
-- 将 `export default { onRequest }` 改为顶层命名导出 `export async function onRequest(context)`，解决运行时报 `onRequest is not defined` 的错误。
-- 增强 host 解析（从 Host 头/URL 中获取并规范化），支持端口剥离与小写比较。
-- 在本地 dev wrapper 中拦截 `/.well-known/` 前缀请求以减少无用日志。
-
----
-
-如果你希望我把 README 翻译为英文、添加 CI 示例（GitHub Actions）、或为规则添加校验脚本，我可以继续实现这些改进。要继续哪一项？
