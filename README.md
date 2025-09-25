@@ -11,7 +11,32 @@
 
 ## 使用方法
 
-### 1. 配置重定向规则
+有两种方式可以配置重定向规则：
+
+### 方法一：使用 EdgeOne 控制台配置（推荐）
+
+在项目根目录创建 [edgeone.json](file:///edgeone.json) 文件，添加重定向规则：
+
+```json
+{
+  "redirects": [
+    {
+      "source": "www.edison.ink",
+      "destination": "https://edison.ink",
+      "statusCode": 302
+    },
+    {
+      "source": "cute.edison.ink",
+      "destination": "https://edison.ink",
+      "statusCode": 302
+    }
+  ]
+}
+```
+
+这种方法使用 EdgeOne 平台原生的重定向功能，性能更好且更稳定。
+
+### 方法二：使用 Edge Functions 代码配置
 
 编辑 [/edge-functions/utils/redirect-config.js](file:///edge-functions/utils/redirect-config.js) 文件中的 `redirectRules` 数组：
 
@@ -35,13 +60,13 @@
 ]
 ```
 
-### 2. 重定向规则说明
+### 重定向规则说明
 
-- `source`: 源域名，支持通配符（如 `*.example.com`）
-- `destination`: 目标 URL
+- `source`: 源域名或路径，支持通配符（如 `*.example.com`）和参数（如 `/articles/:id`）
+- `destination`: 目标 URL 或路径
 - `statusCode`: HTTP 状态码（如 301 永久重定向，302 临时重定向）
 
-### 3. 部署
+### 部署
 
 将代码推送到您的 EdgeOne Pages 仓库，平台会自动构建并部署函数。
 
