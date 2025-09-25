@@ -9,6 +9,11 @@ export const redirectRules = [
     "source": "cute.edison.ink",
     "destination": "https://edison.ink",
     "statusCode": 302
+  },
+  {
+    "source": "edison.mfawa.top",
+    "destination": "https://edison.ink",
+    "statusCode": 302
   }
 ];
 
