@@ -10,8 +10,8 @@
     "statusCode": 302
   },
   {
-    "source": "edison.mfawa.top",
-    "destination": "https://edison.ink",
+    "source": "www.imbee.top",
+    "destination": "https://imbee.top",
     "statusCode": 302
   }
 ]
