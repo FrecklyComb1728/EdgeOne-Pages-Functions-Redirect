@@ -38,7 +38,7 @@
 
 ### 方法二：使用 Edge Functions 代码配置
 
-编辑 [/edge-functions/utils/redirect-config.js](file:///edge-functions/utils/redirect-config.js) 文件中的 `redirectRules` 数组：
+编辑 [/functions/utils/redirect-config.js](file:///functions/utils/redirect-config.js) 文件中的 `redirectRules` 数组：
 
 ```javascript
 [
@@ -60,19 +60,26 @@
 ]
 ```
 
-### 重定向规则说明
+## 重定向规则说明
 
 - `source`: 源域名或路径，支持通配符（如 `*.example.com`）和参数（如 `/articles/:id`）
 - `destination`: 目标 URL 或路径
 - `statusCode`: HTTP 状态码（如 301 永久重定向，302 临时重定向）
 
-### 部署
+## 部署
 
 将代码推送到您的 EdgeOne Pages 仓库，平台会自动构建并部署函数。
 
+## 已修复的问题
+
+1. **500内部服务器错误**：增加了错误处理机制，防止未捕获的异常导致服务器错误
+2. **参数验证**：增加了对输入参数的检查，防止因空值或无效值导致的错误
+3. **配置文件恢复**：重新创建了[edgeone.json](file:///edgeone.json)配置文件，确保重定向规则正确应用
+4. **Host头检查**：增加了对请求中Host头的检查，防止因缺少Host头导致的错误
+
 ## 工作原理
 
-由于 [index.js](file:///edge-functions/index.js) 位于 [/edge-functions](file:///edge-functions) 目录的根目录下，它会拦截所有请求并检查是否需要重定向：
+由于 [index.js](file:///functions/index.js) 位于 [/functions](file:///functions) 目录的根目录下，它会拦截所有请求并检查是否需要重定向：
 
 - 访问 `http://example.com/some/path?query=1` 将会重定向到 `https://new-example.com/some/path?query=1`（301重定向）
 - 访问 `http://test.example.com/` 将会重定向到 `https://test.new-example.com/`（302重定向）
@@ -82,4 +89,4 @@
 
 ## 自定义
 
-您可以根据需要修改 [/edge-functions/utils/redirect-config.js](file:///edge-functions/utils/redirect-config.js) 中的规则，支持更多复杂的重定向需求。
+您可以根据需要修改 [/functions/utils/redirect-config.js](file:///functions/utils/redirect-config.js) 中的规则，支持更多复杂的重定向需求。
