@@ -1,92 +1,81 @@
-# EdgeOne Functions 重定向
+# EdgeOne Functions Redirect
 
-这个项目提供了一个基于 EdgeOne Functions 的重定向解决方案，允许根据域名进行重定向，并支持自定义状态码。
+轻量的 Edge Functions 重定向示例，基于一个 JSON 规则表（`edge-functions/redirect-rules.json`）按 Host 做域名重定向。适合在 EdgeOne / Pages 平台本地开发与部署。
 
-## 功能特点
+## 目录
 
-- 基于域名的重定向
-- 支持自定义 HTTP 状态码（301、302 等）
-- 支持通配符匹配（如 `*.example.com`）
-- 路径保持：重定向时保留原始路径和查询参数
+- `edge-functions/index.js` - Edge 函数实现（入口为 `onRequest`）。
+- `edge-functions/redirect-rules.json` - 重定向规则数组。
 
-## 使用方法
+## 功能说明
 
-有两种方式可以配置重定向规则：
+当收到请求时，函数会：
 
-### 方法一：使用 EdgeOne 控制台配置（推荐）
+- 解析请求 Host（优先 `Host` 头；若缺失则解析请求 URL）。
+- 将 Host 规范化（小写并剥离端口）。
+- 在规则数组中查找精确匹配或以 `*.` 开头的通配子域匹配，例如 `*.example.com` 可以匹配 `a.example.com`。
+- 若匹配，则根据对应规则返回带 `Location` 头的重定向响应；否则返回 404。
 
-在项目根目录创建 [edgeone.json](file:///edgeone.json) 文件，添加重定向规则：
+## 规则格式 (edge-functions/redirect-rules.json)
+
+规则是一个 JSON 数组，每项包含：
+
+- `source` (string)：要匹配的主机名，例如 `www.edison.ink`、`*.example.com` 或包含端口的 `127.0.0.1:8088`。
+- `destination` (string)：目标基础地址（不应包含路径查询），例如 `https://edison.ink`。
+- `statusCode` (number)：重定向 HTTP 状态码，通常为 301 或 302。
+
+示例：
 
 ```json
-{
-  "redirects": [
-    {
-      "source": "www.edison.ink",
-      "destination": "https://edison.ink",
-      "statusCode": 302
-    },
-    {
-      "source": "cute.edison.ink",
-      "destination": "https://edison.ink",
-      "statusCode": 302
-    }
-  ]
-}
-```
-
-这种方法使用 EdgeOne 平台原生的重定向功能，性能更好且更稳定。
-
-### 方法二：使用 Edge Functions 代码配置
-
-编辑 [/functions/utils/redirect-config.js](file:///functions/utils/redirect-config.js) 文件中的 `redirectRules` 数组：
-
-```javascript
 [
-  {
-    "source": "example.com",
-    "destination": "https://new-example.com",
-    "statusCode": 301
-  },
-  {
-    "source": "test.example.com",
-    "destination": "https://test.new-example.com",
-    "statusCode": 302
-  },
-  {
-    "source": "*.oldsite.com",
-    "destination": "https://newsite.com",
-    "statusCode": 301
-  }
+  { "source": "www.edison.ink", "destination": "https://edison.ink", "statusCode": 302 },
+  { "source": "*.example.com", "destination": "https://example.com", "statusCode": 302 }
 ]
 ```
 
-## 重定向规则说明
+注意：
 
-- `source`: 源域名或路径，支持通配符（如 `*.example.com`）和参数（如 `/articles/:id`）
-- `destination`: 目标 URL 或路径
-- `statusCode`: HTTP 状态码（如 301 永久重定向，302 临时重定向）
+- `source` 为字符串比较；支持 `*.` 前缀的简单通配（仅匹配子域）。
+- `destination` 不会自动去重斜杠，规则编写时请使用不带尾部路径的域名（如 `https://example.com`）。
+
+## 本地开发与调试
+
+需要安装并使用 EdgeOne / pages 本地开发工具（你当前项目使用 `edgeone pages dev`）：
+
+1. 在项目根运行开发服务器：
+
+```powershell
+edgeone pages dev
+```
+
+2. 在另一个终端使用 curl 或浏览器访问本地函数，并传入不同的 Host 头以测试匹配：
+
+```powershell
+# 使用 Host 头模拟请求
+curl -v -H "Host: www.edison.ink" http://localhost:8088/
+curl -v -H "Host: cute.edison.ink" http://localhost:8088/
+curl -v -H "Host: 127.0.0.1:8088" http://localhost:8088/
+```
+
+如果返回带 `Location` 的响应并且状态码符合规则，则为正确行为。
 
 ## 部署
 
-将代码推送到您的 EdgeOne Pages 仓库，平台会自动构建并部署函数。
+将 `edge-functions/` 目录部署到支持 EdgeOne / Pages 的平台。确保入口为命名导出 `onRequest`（而不是 default 对象），否则运行时会出现 `ReferenceError: onRequest is not defined`。
 
-## 已修复的问题
+## 建议的改进（可选）
 
-1. **500内部服务器错误**：增加了错误处理机制，防止未捕获的异常导致服务器错误
-2. **参数验证**：增加了对输入参数的检查，防止因空值或无效值导致的错误
-3. **配置文件恢复**：重新创建了[edgeone.json](file:///edgeone.json)配置文件，确保重定向规则正确应用
-4. **Host头检查**：增加了对请求中Host头的检查，防止因缺少Host头导致的错误
+- 添加规则校验脚本，启动时验证 `redirect-rules.json` 的正确性（缺失字段、错误 URL、冲突规则等）。
+- 将规则转换成更高效的数据结构（如 Map）用于生产环境以加速查找。
+- 为常用场景添加测试（例如：精确匹配、通配符匹配、带端口的 host、缺失 Host header）。
+- 在 CI 中加入 lint/格式和简单的集成测试，保证入口函数签名正确。
 
-## 工作原理
+## 变更记录（本仓库当前修改）
 
-由于 [index.js](file:///functions/index.js) 位于 [/functions](file:///functions) 目录的根目录下，它会拦截所有请求并检查是否需要重定向：
+- 将 `export default { onRequest }` 改为顶层命名导出 `export async function onRequest(context)`，解决运行时报 `onRequest is not defined` 的错误。
+- 增强 host 解析（从 Host 头/URL 中获取并规范化），支持端口剥离与小写比较。
+- 在本地 dev wrapper 中拦截 `/.well-known/` 前缀请求以减少无用日志。
 
-- 访问 `http://example.com/some/path?query=1` 将会重定向到 `https://new-example.com/some/path?query=1`（301重定向）
-- 访问 `http://test.example.com/` 将会重定向到 `https://test.new-example.com/`（302重定向）
-- 访问 `http://blog.oldsite.com/article/123` 将会重定向到 `https://newsite.com/article/123`（301重定向）
+---
 
-如果请求的域名没有匹配的重定向规则，函数将返回 404 错误，此时请求会被传递给 Pages 的静态资源处理。
-
-## 自定义
-
-您可以根据需要修改 [/functions/utils/redirect-config.js](file:///functions/utils/redirect-config.js) 中的规则，支持更多复杂的重定向需求。
+如果你希望我把 README 翻译为英文、添加 CI 示例（GitHub Actions）、或为规则添加校验脚本，我可以继续实现这些改进。要继续哪一项？
