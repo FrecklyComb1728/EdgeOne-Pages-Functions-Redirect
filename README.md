@@ -33,32 +33,3 @@
 ]
 ```
 
-注意：
-
-- `source` 为字符串比较；支持 `*.` 前缀的简单通配（仅匹配子域）。
-- `destination` 不会自动去重斜杠，规则编写时请使用不带尾部路径的域名（如 `https://example.com`）。
-
-## 本地开发与调试
-
-需要安装并使用 EdgeOne / pages 本地开发工具（你当前项目使用 `edgeone pages dev`）：
-
-1. 在项目根运行开发服务器：
-
-```powershell
-edgeone pages dev
-```
-
-2. 在另一个终端使用 curl 或浏览器访问本地函数，并传入不同的 Host 头以测试匹配：
-
-```powershell
-# 使用 Host 头模拟请求
-curl -v -H "Host: www.edison.ink" http://localhost:8088/
-curl -v -H "Host: cute.edison.ink" http://localhost:8088/
-curl -v -H "Host: 127.0.0.1:8088" http://localhost:8088/
-```
-
-如果返回带 `Location` 的响应并且状态码符合规则，则为正确行为。
-
-## 部署
-
-将 `edge-functions/` 目录部署到支持 EdgeOne / Pages 的平台。确保入口为命名导出 `onRequest`（而不是 default 对象），否则运行时会出现 `ReferenceError: onRequest is not defined`。
