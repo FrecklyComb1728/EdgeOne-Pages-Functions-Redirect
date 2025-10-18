@@ -1,5 +1,10 @@
 [
   {
+    "source": "www.mfawa.top",
+    "destination": "https://mfawa.top",
+    "statusCode": 302
+  },
+  {
     "source": "www.edison.ink",
     "destination": "https://edison.ink",
     "statusCode": 302
@@ -12,6 +17,6 @@
   {
     "source": "www.imbee.top",
     "destination": "https://imbee.top",
-    "statusCode": 302
+    "statusCode": 301
   }
 ]
