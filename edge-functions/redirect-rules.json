@@ -1,5 +1,10 @@
 [
   {
+    "source": "s.mfawa.top/socloud",
+    "destination": "https://idc.speedonline.cloud/aff/OJTKXEXO",
+    "statusCode": 302
+  },
+  {
     "source": "www.mfawa.top",
     "destination": "https://mfawa.top",
     "statusCode": 302
