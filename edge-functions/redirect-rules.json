@@ -1,26 +1,32 @@
 [
   {
-    "source": "s.mfawa.top/socloud",
+    "default": true, 
+    "destination": "https://github.com/FrecklyComb1728/EdgeOne-Pages-Functions-Redirect",
+    "statusCode": 302
+  },
+  {
+    "domain": "s.mfawa.top",
+    "path": "/socloud",
     "destination": "https://idc.speedonline.cloud/aff/OJTKXEXO",
     "statusCode": 302
   },
   {
-    "source": "www.mfawa.top",
+    "domain": "www.mfawa.top",
     "destination": "https://mfawa.top",
     "statusCode": 302
   },
   {
-    "source": "www.edison.ink",
+    "domain": "www.edison.ink",
     "destination": "https://edison.ink",
     "statusCode": 302
   },
   {
-    "source": "cute.edison.ink",
+    "domain": "cute.edison.ink",
     "destination": "https://edison.ink",
     "statusCode": 302
   },
   {
-    "source": "www.imbee.top",
+    "domain": "www.imbee.top",
     "destination": "https://imbee.top",
     "statusCode": 301
   }

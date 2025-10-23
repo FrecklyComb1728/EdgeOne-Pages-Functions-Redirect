@@ -5,12 +5,7 @@ export function onRequest(context) {
   const url = new URL(request.url);
   const host = url.hostname;
   const path = url.pathname;
-
-  // 只处理纯域名请求(不包含路径或只有根路径'/')
-  if (path !== '/') {
-    return new Response('Not Found', { status: 404 });
-  }
-
+  
   let matchedRule = null;
   let defaultRule = null;
   
@@ -24,7 +19,7 @@ export function onRequest(context) {
       continue;
     }
     
-    if (rule.domain === host && !rule.path) {
+    if (rule.domain === host && rule.path && path === rule.path) {
       matchedRule = rule;
       break;
     }
@@ -46,4 +41,3 @@ export function onRequest(context) {
   
   return new Response('Not Found', { status: 404 });
 }
-

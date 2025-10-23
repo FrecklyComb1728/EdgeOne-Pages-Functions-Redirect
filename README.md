@@ -1,35 +1,54 @@
-# EdgeOne Functions Redirect
+# EdgeOne Pages Edge-functions 重定向服务
 
-轻量的 Edge Functions 重定向示例，基于一个 JSON 规则表（`edge-functions/redirect-rules.json`）按 Host 做域名重定向。适合在 EdgeOne / Pages 平台本地开发与部署。
+基于腾讯云EdgeOne Pages Edge-functions实现的灵活域名重定向服务。
 
-## 目录
+## 功能特点
 
-- `edge-functions/index.js` - Edge 函数实现（入口为 `onRequest`）。
-- `edge-functions/redirect-rules.json` - 重定向规则数组。
+- 支持基于域名的重定向
+- 支持基于域名+路径的重定向
+- 支持默认重定向规则
+- 自动保留查询参数
+- 可配置HTTP状态码(301/302)
 
-## 功能说明
+## 配置说明
 
-当收到请求时，函数会：
-
-- 解析请求 Host（优先 `Host` 头；若缺失则解析请求 URL）。
-- 将 Host 规范化（小写并剥离端口）。
-- 在规则数组中查找精确匹配或以 `*.` 开头的通配子域匹配，例如 `*.example.com` 可以匹配 `a.example.com`。
-- 若匹配，则根据对应规则返回带 `Location` 头的重定向响应；否则返回 404。
-
-## 规则格式 (edge-functions/redirect-rules.json)
-
-规则是一个 JSON 数组，每项包含：
-
-- `source` (string)：要匹配的主机名，例如 `www.edison.ink`、`*.example.com` 或包含端口的 `127.0.0.1:8088`。
-- `destination` (string)：目标基础地址（不应包含路径查询），例如 `https://edison.ink`。
-- `statusCode` (number)：重定向 HTTP 状态码，通常为 301 或 302。
-
-示例：
+在`edge-functions/redirect-rules.json`中配置重定向规则：
 
 ```json
 [
-  { "source": "www.edison.ink", "destination": "https://edison.ink", "statusCode": 302 },
-  { "source": "*.example.com", "destination": "https://example.com", "statusCode": 302 }
+  {
+    "default": true, 
+    "destination": "https://example.com",
+    "statusCode": 302
+  },
+  {
+    "domain": "example.com",
+    "destination": "https://new-example.com",
+    "statusCode": 301
+  },
+  {
+    "domain": "example.org",
+    "path": "/special",
+    "destination": "https://special.example.org",
+    "statusCode": 302
+  }
 ]
 ```
 
+### 规则说明
+
+1. 只配置`domain`：访问该域名时重定向到目标网站，路径会被保留
+2. 同时配置`domain`和`path`：需同时匹配域名和路径才重定向
+3. 配置`default`为`true`：当没有匹配规则时使用的默认重定向
+4. `statusCode`：HTTP重定向状态码，301(永久)或302(临时)
+
+## 部署方法
+
+1. 克隆本仓库
+2. 修改`edge-functions/redirect-rules.json`配置文件
+3. 使用EdgeOne Pages部署服务
+
+## 实现原理
+
+- `index.js`：处理纯域名重定向和默认规则
+- `[[default]].js`：处理域名+路径重定向和默认规则
